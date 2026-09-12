@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TransitGo — Book Train & Bus Tickets</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --navy:#0B2545;
+  --navy-2:#123564;
+  --blue:#1B4B87;
+  --green:#0FA968;
+  --green-dark:#0B8452;
+  --red:#D64545;
+  --bg:#F5F7FA;
+  --card:#FFFFFF;
+  --text:#101826;
+  --text-2:#425466;
+  --text-3:#7C8AA0;
+  --border:#E3E8F0;
+  --radius:8px;
+  --shadow:0 1px 2px rgba(11,37,69,.06), 0 4px 16px rgba(11,37,69,.06);
+  --focus:#1B4B87;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:'Inter',system-ui,sans-serif;
+  color:var(--text);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.brand-name{font-family:'Space Grotesk',sans-serif;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,select{font-family:inherit;font-size:0.95rem;}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
+:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px;}
+
+.view{display:none;max-width:1240px;margin:0 auto;padding:0 24px 64px;}
+.view.active{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion: reduce){.view.active{animation:none;}}
+
+.link-more{color:var(--blue);font-weight:600;font-size:.9rem;}
+.link-more:hover{text-decoration:underline;}
+.tag-pill{display:inline-block;background:#E9F1FF;color:var(--blue);font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:20px;}
+.tag-pill-verified{background:#E4F7EE;color:var(--green-dark);}
+
+.site-header{
+  position:sticky;top:0;z-index:100;
+  background:var(--navy);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.header-inner{
+  max-width:1240px;margin:0 auto;padding:0 20px;height:64px;
+  display:flex;align-items:center;gap:20px;
+}
+.brand{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.brand-name{color:#fff;font-weight:700;font-size:1.15rem;letter-spacing:-0.01em;}
+.hamburger{
+  display:none;flex-direction:column;justify-content:center;gap:4px;
+  width:36px;height:36px;background:none;border:none;padding:6px;
+}
+.hamburger span{display:block;height:2px;width:100%;background:#fff;border-radius:2px;}
+.main-nav{display:flex;gap:4px;flex:1;}
+.nav-link{
+  color:rgba(255,255,255,.72);font-weight:500;font-size:.92rem;
+  padding:8px 12px;border-radius:6px;transition:background .15s,color .15s;
+}
+.nav-link:hover{background:rgba(255,255,255,.08);color:#fff;}
+.nav-link.active-nav{color:#fff;background:rgba(255,255,255,.12);}
+.header-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+
+.mode-toggle-mini{display:flex;background:rgba(255,255,255,.08);border-radius:20px;padding:3px;}
+.mode-btn-mini{
+  border:none;background:none;color:rgba(255,255,255,.75);font-size:.82rem;font-weight:600;
+  padding:6px 14px;border-radius:16px;transition:.15s;
+}
+.mode-btn-mini.active-mode{background:var(--green);color:#fff;}
+
+.lang-select select{
+  background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);
+  border-radius:6px;padding:6px 8px;font-size:.82rem;
+}
+.lang-select select option{color:#000;}
+
+.account-btn{
+  width:36px;height:36px;border-radius:50%;background:var(--blue);border:none;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.mobile-nav{display:none;flex-direction:column;padding:8px 20px 16px;background:var(--navy-2);}
+.mobile-nav a{color:rgba(255,255,255,.85);padding:12px 4px;border-bottom:1px solid rgba(255,255,255,.08);font-weight:500;}
+.mobile-nav.open{display:flex;}
+
+.hero{
+  background:linear-gradient(160deg,var(--navy) 0%,var(--blue) 100%);
+  padding:52px 24px 40px;
+}
+.hero-inner{max-width:1000px;margin:0 auto;text-align:left;}
+.hero-eyebrow{color:#8FD9B8;font-weight:600;font-size:.85rem;margin:0 0 10px;}
+.hero h1{color:#fff;font-size:clamp(1.9rem,4vw,2.9rem);line-height:1.12;margin:0 0 12px;max-width:16ch;}
+.hero-sub{color:rgba(255,255,255,.82);font-size:1.02rem;max-width:56ch;margin:0 0 32px;line-height:1.5;}
+
+.search-widget{background:var(--card);border-radius:14px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25);}
+.mode-toggle{display:inline-flex;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:16px;}
+.mode-btn{
+  display:flex;align-items:center;gap:7px;border:none;background:none;color:var(--text-2);
+  font-weight:600;font-size:.9rem;padding:9px 18px;border-radius:8px;transition:.15s;
+}
+.mode-btn.active-mode{background:var(--navy);color:#fff;}
+
+.search-grid{
+  display:grid;
+  grid-template-columns:1.3fr auto 1.3fr 1fr 1.2fr auto;
+  gap:12px;align-items:end;
+}
+.field{display:flex;flex-direction:column;gap:5px;position:relative;}
+.field label{font-size:.76rem;font-weight:600;color:var(--text-2);text-transform:none;}
+.field input,.field select{
+  border:1.5px solid var(--border);border-radius:8px;padding:11px 12px;font-size:.92rem;color:var(--text);background:#fff;
+}
+.field input:focus,.field select:focus{border-color:var(--blue);}
+.input-with-icon{position:relative;display:flex;align-items:center;}
+.input-with-icon input{padding-left:30px;width:100%;}
+.dot{position:absolute;left:11px;width:8px;height:8px;border-radius:50%;}
+.dot-from{background:var(--blue);}
+.dot-to{background:var(--green);}
+
+.swap-btn{
+  align-self:center;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border);
+  background:#fff;color:var(--text-2);display:flex;align-items:center;justify-content:center;
+  margin-bottom:2px;transition:.15s;
+}
+.swap-btn:hover{background:var(--bg);color:var(--navy);transform:rotate(180deg);}
+
+.btn-search{
+  background:var(--green);color:#fff;border:none;border-radius:8px;padding:12px 20px;
+  font-weight:700;font-size:.94rem;display:flex;align-items:center;gap:8px;justify-content:center;
+  white-space:nowrap;transition:background .15s;
+}
+.btn-search:hover{background:var(--green-dark);}
+
+.autocomplete-list{
+  position:absolute;top:100%;left:0;right:0;margin-top:4px;background:#fff;border:1px solid var(--border);
+  border-radius:8px;box-shadow:var(--shadow);list-style:none;padding:6px;z-index:20;max-height:220px;overflow-y:auto;
+}
+.autocomplete-list li{padding:9px 10px;border-radius:6px;font-size:.88rem;cursor:pointer;}
+.autocomplete-list li:hover,.autocomplete-list li.active-option{background:var(--bg);}
+.autocomplete-list li small{color:var(--text-3);display:block;font-size:.76rem;}
+
+.trust-strip{
+  max-width:1240px;margin:0 auto;padding:28px 24px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+}
+.trust-item{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.trust-item strong{display:block;font-size:.92rem;margin-bottom:2px;}
+.trust-item span{color:var(--text-2);font-size:.83rem;}
+
+.section-head{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 18px;}
+.section-head h2{font-size:1.4rem;margin:0;}
+.deals-section,.hubs-section{max-width:1240px;margin:0 auto;padding:16px 24px 36px;}
+.deals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.deal-card{border-radius:12px;padding:22px;color:#fff;}
+.deal-card h3{margin:8px 0 6px;font-size:1.15rem;}
+.deal-card p{margin:0;font-size:.88rem;opacity:.92;}
+.deal-tag{background:rgba(255,255,255,.2);font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;}
+.deal-blue{background:linear-gradient(135deg,var(--blue),var(--navy));}
+.deal-green{background:linear-gradient(135deg,#12B076,var(--green-dark));}
+.deal-navy{background:linear-gradient(135deg,#1E3A5F,var(--navy));}
+
+.hubs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.hub-card{position:relative;border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--border);padding-bottom:12px;}
+.hub-photo{height:110px;background-size:cover;background-position:center;}
+.hub-photo-1{background:linear-gradient(135deg,#254b78,#0b2545);}
+.hub-photo-2{background:linear-gradient(135deg,#0f7a52,#0b2545);}
+.hub-photo-3{background:linear-gradient(135deg,#3a6ea8,#123564);}
+.hub-photo-4{background:linear-gradient(135deg,#0FA968,#123564);}
+.hub-badge{position:absolute;top:10px;left:10px;background:#fff;color:var(--navy);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:5px;}
+.hub-card strong{display:block;margin:10px 12px 2px;font-size:.92rem;}
+.hub-card span:last-child{display:block;margin:0 12px;color:var(--text-3);font-size:.78rem;}
+
+.progress-rail{
+  display:flex;align-items:center;justify-content:center;gap:0;
+  padding:22px 0 26px;flex-wrap:wrap;
+}
+.progress-step{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:64px;}
+.progress-step span:last-child{font-size:.78rem;font-weight:600;color:var(--text-3);}
+.step-dot{
+  width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--text-3);
+}
+.progress-step.done .step-dot{background:var(--green);border-color:var(--green);color:#fff;}
+.progress-step.done span:last-child{color:var(--green-dark);}
+.progress-step.current .step-dot{background:var(--navy);border-color:var(--navy);color:#fff;}
+.progress-step.current span:last-child{color:var(--navy);}
+.progress-line{width:40px;height:2px;background:var(--border);margin:0 4px 20px;}
+
+.sticky-summary{
+  position:sticky;top:64px;z-index:40;background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px;box-shadow:var(--shadow);
+}
+.summary-route{display:flex;align-items:center;gap:8px;font-size:.95rem;}
+.summary-meta{color:var(--text-2);font-size:.85rem;display:flex;gap:8px;}
+.dot-sep{color:var(--text-3);}
+.sticky-summary .btn-ghost-sm{margin-left:auto;}
+
+.results-layout{display:grid;grid-template-columns:250px 1fr;gap:24px;align-items:start;}
+.filters-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:sticky;top:130px;}
+.filters-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.filters-head h3{margin:0;font-size:1rem;}
+.link-reset{background:none;border:none;color:var(--blue);font-size:.82rem;font-weight:600;}
+.filter-group{margin-bottom:20px;}
+.filter-label{display:block;font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:9px;}
+.chip-row{display:flex;gap:8px;}
+.chip{border:1.5px solid var(--border);background:#fff;border-radius:20px;padding:6px 14px;font-size:.82rem;font-weight:600;color:var(--text-2);}
+.chip.active-chip{background:var(--navy);color:#fff;border-color:var(--navy);}
+.checkbox-grid{display:flex;flex-direction:column;gap:9px;}
+.checkbox-grid label{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-2);}
+input[type=range]{width:100%;accent-color:var(--green);}
+
+.results-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:.9rem;color:var(--text-2);}
+.sort-control{display:flex;align-items:center;gap:8px;}
+.sort-control select{border:1.5px solid var(--border);border-radius:6px;padding:7px 9px;}
+
+.results-list{display:flex;flex-direction:column;gap:14px;}
+.result-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:box-shadow .15s;}
+.result-card:hover{box-shadow:var(--shadow);}
+.result-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.result-op{display:flex;gap:10px;align-items:flex-start;}
+.result-icon{width:36px;height:36px;border-radius:8px;background:#E9F1FF;color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.result-op strong{font-size:1rem;}
+.result-op div span{display:block;color:var(--text-3);font-size:.8rem;}
+.result-badge{background:var(--green);color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:5px;margin-left:8px;}
+.result-price{text-align:right;}
+.result-price strong{font-size:1.25rem;display:block;}
+.result-price span{color:var(--green-dark);font-size:.78rem;font-weight:600;}
+
+.result-timeline{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:16px 0;}
+.result-timeline .t-time{font-size:1.15rem;font-weight:700;}
+.result-timeline .t-place{color:var(--text-2);font-size:.82rem;}
+.t-mid{text-align:center;color:var(--text-3);font-size:.78rem;}
+.t-track{height:2px;background:var(--border);position:relative;margin:6px 0;}
+.t-track::before,.t-track::after{content:"";position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--blue);}
+.t-track::before{left:0;}.t-track::after{right:0;background:var(--green);}
+
+.result-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.result-tags{display:flex;gap:8px;flex-wrap:wrap;}
+.tag-soft{background:var(--bg);color:var(--text-2);font-size:.78rem;padding:4px 10px;border-radius:6px;}
+.tag-soft.tag-avail{color:var(--green-dark);}
+.result-amenities{color:var(--text-3);font-size:.8rem;display:flex;gap:14px;}
+
+.btn-primary{
+  background:var(--navy);color:#fff;border:none;border-radius:8px;padding:11px 22px;
+  font-weight:700;font-size:.92rem;transition:background .15s;
+}
+.btn-primary:hover{background:var(--navy-2);}
+.btn-primary:disabled{background:#B7C0CD;cursor:not-allowed;}
+.btn-secondary{background:var(--green);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-weight:700;font-size:.92rem;}
+.btn-secondary:hover{background:var(--green-dark);}
+.btn-ghost-sm{background:none;border:1.5px solid var(--border);color:var(--text-2);border-radius:7px;padding:9px 16px;font-weight:600;font-size:.85rem;}
+.btn-ghost-sm:hover{border-color:var(--navy);color:var(--navy);}
+.btn-danger-outline{background:none;border:1.5px solid var(--red);color:var(--red);border-radius:7px;padding:9px 16px;font-weight:600;font-size:.85rem;}
+.btn-danger-outline:hover{background:#FDEDED;}
+.btn-block{width:100%;margin-top:10px;}
+.book-now-btn{background:var(--navy);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:700;font-size:.88rem;}
+.book-now-btn:hover{background:var(--green);}
+
+.journey-banner{
+  background:var(--navy);color:#fff;border-radius:var(--radius);padding:16px 20px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;
+}
+.journey-banner strong{margin-right:10px;font-size:1rem;}
+.journey-banner .tag-pill{background:rgba(255,255,255,.15);color:#fff;}
+#seatSelectedSummary{color:rgba(255,255,255,.85);font-size:.88rem;}
+
+.seats-layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start;}
+.seat-map-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.seat-map-head h3{margin:0 0 4px;font-size:1.1rem;}
+.seat-map-head p{margin:0 0 16px;color:var(--text-2);font-size:.88rem;}
+.coach-tabs{display:flex;gap:8px;margin-bottom:16px;}
+.coach-tab{border:1.5px solid var(--border);background:#fff;border-radius:7px;padding:7px 16px;font-weight:600;font-size:.85rem;color:var(--text-2);}
+.coach-tab.active-coach{background:var(--navy);color:#fff;border-color:var(--navy);}
+.seat-legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:18px;font-size:.82rem;color:var(--text-2);}
+.seat-legend span{display:flex;align-items:center;gap:6px;}
+.legend-swatch{width:14px;height:14px;border-radius:4px;display:inline-block;border:1.5px solid var(--border);}
+.legend-available{background:#fff;}
+.legend-selected{background:var(--navy);border-color:var(--navy);}
+.legend-occupied{background:#DDE2E9;border-color:#DDE2E9;}
+.legend-women{background:#FFE3EC;border-color:#F3A9C4;}
+
+.seat-map{display:flex;flex-direction:column;gap:10px;max-width:340px;margin:0 auto;}
+.seat-row{display:grid;grid-template-columns:1fr 1fr 24px 1fr 1fr;gap:8px;align-items:center;}
+.seat{
+  width:100%;aspect-ratio:1;border-radius:7px;border:1.5px solid var(--border);background:#fff;
+  font-size:.78rem;font-weight:700;color:var(--text-2);display:flex;align-items:center;justify-content:center;
+  min-height:40px;transition:.12s;
+}
+.seat.occupied{background:#DDE2E9;border-color:#DDE2E9;color:#9AA5B4;cursor:not-allowed;}
+.seat.women-only{background:#FFE3EC;border-color:#F3A9C4;color:#C6407A;}
+.seat.selected{background:var(--navy);border-color:var(--navy);color:#fff;}
+.seat:not(.occupied):hover{border-color:var(--blue);}
+.aisle-gap{width:24px;}
+
+.fare-summary-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:sticky;top:130px;}
+.fare-summary-panel h3{margin:0 0 14px;font-size:1.05rem;}
+.fare-row{display:flex;justify-content:space-between;font-size:.88rem;color:var(--text-2);padding:7px 0;border-bottom:1px solid var(--border);}
+.fare-row.fare-total{border-bottom:none;border-top:1.5px solid var(--border);margin-top:6px;padding-top:12px;font-weight:700;color:var(--text);font-size:1rem;}
+.fare-note{font-size:.8rem;color:var(--text-3);margin:12px 0 0;}
+
+.details-layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start;}
+.details-form-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.details-form-panel h3{margin:0 0 6px;}
+.form-hint{color:var(--text-2);font-size:.86rem;margin:0 0 18px;}
+.passenger-block{border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px;}
+.passenger-block h4{margin:0 0 12px;font-size:.92rem;display:flex;align-items:center;gap:8px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px;}
+.field-row .field{margin-bottom:0;}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.contact-block{margin-top:8px;border-top:1px solid var(--border);padding-top:16px;}
+.contact-block h4{margin:0 0 12px;font-size:.95rem;}
+
+.trip-summary-card{border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.85rem;color:var(--text-2);margin-bottom:14px;}
+.trip-summary-card strong{display:block;color:var(--text);font-size:.92rem;margin-bottom:4px;}
+
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.pay-method{
+  display:flex;align-items:center;gap:10px;border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;
+  cursor:pointer;font-weight:600;font-size:.9rem;
+}
+.pay-method input{margin:0;}
+.pay-method.active-pay{border-color:var(--navy);background:#F2F6FC;}
+.pay-icon{font-size:1.1rem;}
+.pay-panel{border:1px dashed var(--border);border-radius:8px;padding:16px;margin-bottom:16px;background:var(--bg);}
+.coupon-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.coupon-row input{flex:1;min-width:160px;border:1.5px solid var(--border);border-radius:7px;padding:9px 12px;}
+#couponMsg{font-size:.82rem;font-weight:600;color:var(--green-dark);}
+
+.confirm-banner{
+  background:linear-gradient(135deg,var(--green),#0d9560);color:#fff;border-radius:var(--radius);
+  padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:20px;
+}
+.confirm-banner > div:first-child{display:flex;gap:14px;align-items:flex-start;}
+.confirm-banner strong{display:block;font-size:1.1rem;margin-bottom:3px;}
+.confirm-banner span{font-size:.85rem;opacity:.92;}
+.pnr-box{background:rgba(255,255,255,.18);border-radius:8px;padding:8px 16px;text-align:right;}
+.pnr-box span{display:block;font-size:.72rem;opacity:.85;}
+.pnr-box strong{font-size:1.1rem;letter-spacing:.02em;}
+
+.eticket-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;}
+.eticket-head{background:var(--navy);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.eticket-head span:not(.tag-pill){display:block;color:rgba(255,255,255,.8);font-size:.82rem;}
+.eticket-body{display:flex;justify-content:space-between;gap:24px;padding:22px;flex-wrap:wrap;}
+.eticket-route{display:flex;align-items:center;gap:18px;flex:1;min-width:280px;}
+.et-label{display:block;font-size:.75rem;color:var(--text-3);margin-bottom:4px;}
+.eticket-route strong{display:block;font-size:1rem;}
+.eticket-route span:last-child{display:block;color:var(--text-2);font-size:.83rem;margin-top:3px;}
+.et-line{text-align:center;color:var(--text-3);font-size:.78rem;}
+.et-track{width:110px;height:2px;background:var(--border);margin:5px 0;position:relative;}
+.et-track::before,.et-track::after{content:"";position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--blue);}
+.et-track::before{left:0;}.et-track::after{right:0;background:var(--green);}
+.eticket-qr{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.qr-graphic{
+  width:90px;height:90px;background:
+    linear-gradient(90deg,#0B2545 25%,transparent 25%) 0 0/20px 20px,
+    linear-gradient(#0B2545 25%,transparent 25%) 0 0/20px 20px,
+    linear-gradient(90deg,transparent 75%,#0B2545 75%) 0 0/20px 20px,
+    linear-gradient(transparent 75%,#0B2545 75%) 0 0/20px 20px,#fff;
+  border:1.5px solid var(--border);border-radius:6px;
+}
+.barcode{letter-spacing:1px;font-size:1.1rem;color:var(--navy);}
+.eticket-qr span:last-child{color:var(--text-3);font-size:.75rem;}
+
+.eticket-passengers{display:flex;gap:14px;flex-wrap:wrap;padding:0 22px 18px;}
+.pax-chip{border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.85rem;}
+.pax-chip strong{display:block;font-size:.9rem;}
+.pax-chip span{color:var(--text-2);font-size:.8rem;}
+
+.eticket-actions{display:flex;gap:10px;flex-wrap:wrap;padding:0 22px 20px;}
+.eticket-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;border-top:1px solid var(--border);padding:20px 22px;}
+.eticket-info-grid strong{display:block;margin-bottom:6px;font-size:.92rem;}
+.eticket-info-grid p{margin:0 0 8px;color:var(--text-2);font-size:.85rem;}
+.confirm-footer-actions{display:flex;gap:12px;justify-content:center;}
+
+.bookings-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;padding:24px 0 20px;}
+.bookings-head h2{margin:8px 0 4px;font-size:1.5rem;}
+.bookings-head p{margin:0;color:var(--text-2);font-size:.9rem;}
+.bookings-stats{display:flex;gap:12px;}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 20px;text-align:center;}
+.stat-card strong{display:block;font-size:1.3rem;color:var(--navy);}
+.stat-card.stat-green strong{color:var(--green-dark);}
+.stat-card span{font-size:.75rem;color:var(--text-2);}
+
+.bookings-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.booking-tab{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:8px 16px;font-weight:600;font-size:.85rem;color:var(--text-2);}
+.booking-tab span{background:var(--bg);border-radius:10px;padding:1px 7px;margin-left:6px;font-size:.75rem;}
+.booking-tab.active-tab{background:var(--navy);color:#fff;border-color:var(--navy);}
+.booking-tab.active-tab span{background:rgba(255,255,255,.2);color:#fff;}
+
+.bookings-list{display:flex;flex-direction:column;gap:16px;}
+.booking-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.booking-card-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.pnr-line{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-2);}
+.pnr-line strong{color:var(--text);}
+.copy-btn{background:none;border:none;color:var(--blue);font-size:.8rem;font-weight:600;}
+.status-pill{background:#E4F7EE;color:var(--green-dark);font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:20px;}
+.status-pill.status-cancelled{background:#FDEDED;color:var(--red);}
+.booking-route-row{display:grid;grid-template-columns:1fr auto 1fr auto;gap:20px;align-items:center;margin-bottom:14px;}
+.br-col span{display:block;font-size:.78rem;color:var(--text-3);}
+.br-col strong{display:block;font-size:1.05rem;margin:2px 0;}
+.br-col small{color:var(--text-2);font-size:.8rem;}
+.br-mid{text-align:center;color:var(--text-3);font-size:.78rem;}
+.br-pax{font-size:.82rem;color:var(--text-2);}
+.br-pax strong{display:block;color:var(--text);font-size:.95rem;}
+.booking-card-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center;}
+.booking-card-actions .cancel-note{margin-right:auto;color:var(--green-dark);font-size:.8rem;}
+
+.narrow-panel{max-width:560px;margin:40px auto;text-align:center;}
+.narrow-panel h2{margin-bottom:8px;}
+.narrow-panel p{color:var(--text-2);margin-bottom:24px;}
+.pnr-form{display:flex;gap:10px;}
+.pnr-form input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:.95rem;}
+.pnr-result{margin-top:24px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:left;}
+
+.auth-card{max-width:420px;margin:48px auto;background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.auth-tabs{display:flex;}
+.auth-tab{flex:1;background:var(--bg);border:none;padding:16px;font-weight:700;color:var(--text-2);}
+.auth-tab.active-tab{background:#fff;color:var(--navy);border-bottom:3px solid var(--green);}
+.auth-panel{padding:26px;}
+.otp-row{display:flex;gap:10px;margin-bottom:18px;}
+.otp-digit{width:100%;aspect-ratio:1;text-align:center;font-size:1.3rem;border:1.5px solid var(--border);border-radius:8px;}
+
+.help-hero{background:linear-gradient(160deg,var(--navy),var(--blue));color:#fff;border-radius:var(--radius);padding:36px 30px;text-align:center;margin:24px 0;}
+.help-hero h2{margin:0 0 10px;}
+.help-hero p{color:rgba(255,255,255,.85);max-width:56ch;margin:0 auto 22px;}
+.help-search{display:flex;max-width:560px;margin:0 auto;gap:8px;}
+.help-search input{flex:1;border:none;border-radius:8px;padding:12px 16px;font-size:.92rem;}
+.help-topics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:30px;}
+.topic-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.topic-icon{display:inline-flex;width:38px;height:38px;border-radius:8px;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:10px;}
+.topic-blue{background:#E9F1FF;}.topic-red{background:#FDEDED;}.topic-green{background:#E4F7EE;}.topic-orange{background:#FFF1E4;}
+.topic-card strong{display:block;margin-bottom:6px;}
+.topic-card p{margin:0 0 8px;color:var(--text-2);font-size:.85rem;}
+
+.faq-section{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:24px;}
+.faq-section h3{margin:0 0 14px;}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-item:last-child{border-bottom:none;}
+.faq-q{width:100%;background:none;border:none;text-align:left;padding:14px 4px;font-weight:600;font-size:.92rem;display:flex;justify-content:space-between;align-items:center;color:var(--text);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .2s ease;color:var(--text-2);font-size:.87rem;padding:0 4px;}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:14px;}
+.faq-item.open .faq-q{color:var(--blue);}
+
+.contact-options{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.contact-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;}
+.contact-card strong{display:block;margin-bottom:8px;}
+.contact-card p{color:var(--text-2);font-size:.85rem;margin:0 0 14px;}
+
+
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);
+  background:var(--navy);color:#fff;padding:12px 22px;border-radius:8px;font-size:.88rem;font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,.2);transition:transform .25s ease;z-index:200;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+.site-footer{text-align:center;padding:24px;color:var(--text-3);font-size:.82rem;border-top:1px solid var(--border);}
+
+@media (max-width: 1024px){
+  .search-grid{grid-template-columns:1fr 1fr;}
+  .swap-btn{display:none;}
+  .btn-search{grid-column:1/-1;}
+  .results-layout{grid-template-columns:1fr;}
+  .filters-panel{position:static;}
+  .seats-layout{grid-template-columns:1fr;}
+  .details-layout{grid-template-columns:1fr;}
+  .fare-summary-panel{position:static;}
+  .deals-grid{grid-template-columns:1fr;}
+  .hubs-grid{grid-template-columns:1fr 1fr;}
+  .help-topics{grid-template-columns:1fr 1fr;}
+  .contact-options{grid-template-columns:1fr;}
+}
+
+@media (max-width: 760px){
+  .main-nav{display:none;}
+  .hamburger{display:flex;}
+  .header-actions .lang-select{display:none;}
+  .mode-toggle-mini{display:none;}
+  .header-inner{gap:10px;}
+  .trust-strip{grid-template-columns:1fr;}
+  .hero{padding:34px 16px 30px;}
+  .search-widget{padding:14px;}
+  .field-row{grid-template-columns:1fr;}
+  .eticket-body{flex-direction:column;}
+  .eticket-route{flex-direction:column;align-items:flex-start;gap:10px;width:100%;}
+  .et-line{align-self:center;}
+  .eticket-info-grid{grid-template-columns:1fr;}
+  .booking-route-row{grid-template-columns:1fr;text-align:left;}
+  .br-mid{display:none;}
+  .pnr-box{text-align:left;}
+  .confirm-banner{flex-direction:column;align-items:flex-start;}
+  .view{padding:0 14px 48px;}
+  .pay-methods{grid-template-columns:1fr;}
+  .coach-tabs{overflow-x:auto;}
+}
+
+@media (max-width: 480px){
+  .seat-map{max-width:100%;}
+  .hubs-grid{grid-template-columns:1fr;}
+  .help-topics{grid-template-columns:1fr;}
+  .confirm-footer-actions{flex-direction:column;width:100%;}
+  .confirm-footer-actions button{width:100%;}
+}
+
+</style>
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="#home" class="brand" data-nav="home">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <rect width="28" height="28" rx="6" fill="#0FA968"/>
+        <path d="M7 19V9.5C7 8 8.2 7 9.5 7h9c1.3 0 2.5 1 2.5 2.5V19" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M7 15h14" stroke="white" stroke-width="1.8"/>
+        <circle cx="10.5" cy="19.5" r="1.4" fill="white"/>
+        <circle cx="17.5" cy="19.5" r="1.4" fill="white"/>
+      </svg>
+      <span class="brand-name">TransitGo</span>
+    </a>
+
+    <nav class="main-nav" id="mainNav" aria-label="Primary">
+      <a href="#home" data-nav="home" class="nav-link active-nav">Home</a>
+      <a href="#search" data-nav="search" class="nav-link">Search</a>
+      <a href="#bookings" data-nav="bookings" class="nav-link">My Bookings</a>
+      <a href="#pnr" data-nav="pnr" class="nav-link">PNR Status</a>
+      <a href="#help" data-nav="help" class="nav-link">Help &amp; Support</a>
+    </nav>
+
+    <div class="header-actions">
+      <div class="mode-toggle-mini" role="group" aria-label="Travel mode">
+        <button class="mode-btn-mini active-mode" data-mode="train" aria-pressed="true">Train</button>
+        <button class="mode-btn-mini" data-mode="bus" aria-pressed="false">Bus</button>
+      </div>
+      <div class="lang-select">
+        <label for="langSelect" class="sr-only">Language</label>
+        <select id="langSelect">
+          <option value="en">EN</option>
+          <option value="hi">हिं</option>
+          <option value="es">ES</option>
+        </select>
+      </div>
+      <button class="account-btn" id="accountBtn" aria-label="Account" data-nav="login">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="7" r="3.2" stroke="white" stroke-width="1.6"/><path d="M3.5 17c1-3.3 4-5 6.5-5s5.5 1.7 6.5 5" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" id="mobileNav" aria-label="Mobile primary">
+    <a href="#home" data-nav="home">Home</a>
+    <a href="#search" data-nav="search">Search</a>
+    <a href="#bookings" data-nav="bookings">My Bookings</a>
+    <a href="#pnr" data-nav="pnr">PNR Status</a>
+    <a href="#help" data-nav="help">Help &amp; Support</a>
+    <a href="#login" data-nav="login">Login / Signup</a>
+  </nav>
+</header>
+
+<main id="app">
+
+<section class="view active" id="view-home" data-view="home">
+  <div class="hero">
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Live across 10,000+ stations &amp; stops</p>
+      <h1>Get there. On time, on your terms.</h1>
+      <p class="hero-sub">Search real-time train and bus availability, pick your exact seat, and carry a verified e-ticket — all in one place.</p>
+
+      <div class="search-widget" id="searchWidget">
+        <div class="mode-toggle" role="group" aria-label="Travel type">
+          <button class="mode-btn active-mode" data-mode="train" aria-pressed="true">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 12V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v6" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="9" width="10" height="4" rx="0.5" stroke="currentColor" stroke-width="1.5"/><circle cx="6.5" cy="15" r="1" fill="currentColor"/><circle cx="11.5" cy="15" r="1" fill="currentColor"/></svg>
+            Train
+          </button>
+          <button class="mode-btn" data-mode="bus" aria-pressed="false">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="3" y="4" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 10h12" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/></svg>
+            Bus
+          </button>
+        </div>
+
+        <form id="searchForm" autocomplete="off">
+          <div class="search-grid">
+            <div class="field autocomplete-field">
+              <label for="fromInput">From</label>
+              <div class="input-with-icon">
+                <span class="dot dot-from" aria-hidden="true"></span>
+                <input type="text" id="fromInput" placeholder="City or station" value="New Delhi (NDLS)" required>
+              </div>
+              <ul class="autocomplete-list" id="fromList" role="listbox" hidden></ul>
+            </div>
+
+            <button type="button" class="swap-btn" id="swapBtn" aria-label="Swap origin and destination">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 6h10M11 3l3 3-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 12H4M7 15l-3-3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+
+            <div class="field autocomplete-field">
+              <label for="toInput">To</label>
+              <div class="input-with-icon">
+                <span class="dot dot-to" aria-hidden="true"></span>
+                <input type="text" id="toInput" placeholder="City or station" value="Agra Cantt (AGC)" required>
+              </div>
+              <ul class="autocomplete-list" id="toList" role="listbox" hidden></ul>
+            </div>
+
+            <div class="field">
+              <label for="dateInput">Departure date</label>
+              <input type="date" id="dateInput" required>
+            </div>
+
+            <div class="field">
+              <label for="paxInput">Passengers &amp; class</label>
+              <select id="paxInput">
+                <option>1 Adult, Economy</option>
+                <option>2 Adults, Economy</option>
+                <option>1 Adult, Business</option>
+                <option>2 Adults, 1 Child, Economy</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn-search">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.2" stroke="currentColor" stroke-width="1.7"/><path d="M15 15l-3.2-3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              Search available routes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="trust-strip">
+    <div class="trust-item">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M11 3l7 3v5c0 5-3 7.5-7 8.5-4-1-7-3.5-7-8.5V6l7-3z" stroke="#0FA968" stroke-width="1.6"/></svg>
+      <div><strong>Secure payments</strong><span>256-bit encryption on every transaction</span></div>
+    </div>
+    <div class="trust-item">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="#0FA968" stroke-width="1.6"/><path d="M11 6.5V11l3 2" stroke="#0FA968" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <div><strong>24/7 support</strong><span>Live chat and phone, round the clock</span></div>
+    </div>
+    <div class="trust-item">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M4 11l5 5L18 6" stroke="#0FA968" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><strong>Verified operators</strong><span>Partnered with top-rated networks</span></div>
+    </div>
+  </div>
+
+  <section class="deals-section">
+    <div class="section-head">
+      <h2>Offers &amp; coupon codes</h2>
+      <a href="#" class="link-more">View all deals</a>
+    </div>
+    <div class="deals-grid">
+      <div class="deal-card deal-blue">
+        <span class="deal-tag">Limited time</span>
+        <h3>Save 20% on weekend getaways</h3>
+        <p>Use code <strong>WEEKEND20</strong> on any Fri–Sun departure</p>
+      </div>
+      <div class="deal-card deal-green">
+        <span class="deal-tag">Bus special</span>
+        <h3>Flat $10 off on bus bookings</h3>
+        <p>Use code <strong>BUSGO10</strong> on your next sleeper coach</p>
+      </div>
+      <div class="deal-card deal-navy">
+        <span class="deal-tag">New user</span>
+        <h3>₹150 cashback on first ticket</h3>
+        <p>Auto-applied at checkout for first-time bookings</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="hubs-section">
+    <div class="section-head">
+      <h2>Popular transit hubs</h2>
+      <span class="link-more">Top destinations today</span>
+    </div>
+    <div class="hubs-grid">
+      <div class="hub-card"><div class="hub-photo hub-photo-1"></div><span class="hub-badge">Hub #1</span><strong>New Delhi Station</strong><span>42 active connections</span></div>
+      <div class="hub-card"><div class="hub-photo hub-photo-2"></div><span class="hub-badge">Hub #2</span><strong>Mumbai Central</strong><span>35 active connections</span></div>
+      <div class="hub-card"><div class="hub-photo hub-photo-3"></div><span class="hub-badge">Hub #3</span><strong>Bengaluru City</strong><span>28 active connections</span></div>
+      <div class="hub-card"><div class="hub-photo hub-photo-4"></div><span class="hub-badge">Hub #4</span><strong>Chennai Central</strong><span>19 active connections</span></div>
+    </div>
+  </section>
+</section>
+
+<section class="view" id="view-search" data-view="search">
+  <div class="progress-rail" id="progressRail">
+    <div class="progress-step done" data-step="1"><span class="step-dot">✓</span><span>Search</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step current" data-step="2"><span class="step-dot">2</span><span>Select</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step" data-step="3"><span class="step-dot">3</span><span>Details</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step" data-step="4"><span class="step-dot">4</span><span>Payment</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step" data-step="5"><span class="step-dot">5</span><span>Confirmation</span></div>
+  </div>
+
+  <div class="sticky-summary" id="stickySummary">
+    <div class="summary-route">
+      <strong id="sumFrom">New Delhi (NDLS)</strong>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" stroke="#425466" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <strong id="sumTo">Agra Cantt (AGC)</strong>
+    </div>
+    <div class="summary-meta">
+      <span id="sumDate">24 Oct 2026</span>
+      <span class="dot-sep">•</span>
+      <span id="sumPax">1 Adult</span>
+    </div>
+    <button class="btn-ghost-sm" id="modifySearchBtn">Modify search</button>
+  </div>
+
+  <div class="results-layout">
+    <aside class="filters-panel" id="filtersPanel">
+      <div class="filters-head">
+        <h3>Filters</h3>
+        <button class="link-reset" id="resetFilters">Reset all</button>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Mode of transport</span>
+        <div class="chip-row">
+          <button class="chip active-chip" data-filter-mode="train">Trains</button>
+          <button class="chip" data-filter-mode="bus">Buses</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Price range: <span id="priceRangeLabel">$3 – $60</span></span>
+        <input type="range" id="priceRange" min="3" max="60" value="60">
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Departure time</span>
+        <div class="checkbox-grid">
+          <label><input type="checkbox" data-time="morning"> Morning (06–12)</label>
+          <label><input type="checkbox" data-time="afternoon"> Afternoon (12–18)</label>
+          <label><input type="checkbox" data-time="evening"> Evening (18–24)</label>
+          <label><input type="checkbox" data-time="night"> Night (00–06)</label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Operators</span>
+        <div class="checkbox-grid" id="operatorFilters">
+          <label><input type="checkbox" checked data-op="Gatimaan Express"> Gatimaan Express</label>
+          <label><input type="checkbox" checked data-op="Shatabdi Express"> Shatabdi Express</label>
+          <label><input type="checkbox" checked data-op="Taj Express"> Taj Express</label>
+          <label><input type="checkbox" checked data-op="Rajdhani Express"> Rajdhani Express</label>
+          <label><input type="checkbox" checked data-op="Kerala Express"> Kerala Express</label>
+          <label><input type="checkbox" checked data-op="Intercity Express"> Intercity Express</label>
+          <label><input type="checkbox" checked data-op="Punjab Mail"> Punjab Mail</label>
+          <label><input type="checkbox" checked data-op="Duronto Express"> Duronto Express</label>
+          <label><input type="checkbox" checked data-op="IntrCity SmartBus"> IntrCity SmartBus</label>
+          <label><input type="checkbox" checked data-op="RedBus Travels"> RedBus Travels</label>
+          <label><input type="checkbox" checked data-op="Zingbus Premium"> Zingbus Premium</label>
+          <label><input type="checkbox" checked data-op="Orange Tours & Travels"> Orange Tours &amp; Travels</label>
+          <label><input type="checkbox" checked data-op="VRL Travels"> VRL Travels</label>
+          <label><input type="checkbox" checked data-op="Neeta Travels"> Neeta Travels</label>
+          <label><input type="checkbox" checked data-op="Patel Tours"> Patel Tours</label>
+          <label><input type="checkbox" checked data-op="SRS Travels"> SRS Travels</label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Class &amp; amenities</span>
+        <div class="checkbox-grid">
+          <label><input type="checkbox" data-am="ac"> AC</label>
+          <label><input type="checkbox" data-am="sleeper"> Sleeper</label>
+          <label><input type="checkbox" data-am="wifi"> Free Wi-Fi</label>
+          <label><input type="checkbox" data-am="meal"> Meal included</label>
+        </div>
+      </div>
+    </aside>
+
+    <div class="results-list-wrap">
+      <div class="results-toolbar">
+        <span id="resultsCount">Showing 4 available journeys</span>
+        <div class="sort-control">
+          <label for="sortSelect">Sort by</label>
+          <select id="sortSelect">
+            <option value="departure">Departure time (earliest)</option>
+            <option value="price">Price (low to high)</option>
+            <option value="duration">Duration (shortest)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="results-list" id="resultsList"><!-- injected by JS --></div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="view-seats" data-view="seats">
+  <div class="progress-rail">
+    <div class="progress-step done" data-step="1"><span class="step-dot">✓</span><span>Search</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done" data-step="2"><span class="step-dot">✓</span><span>Select</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step current" data-step="3"><span class="step-dot">3</span><span>Details</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step" data-step="4"><span class="step-dot">4</span><span>Payment</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step" data-step="5"><span class="step-dot">5</span><span>Confirmation</span></div>
+  </div>
+
+  <div class="journey-banner" id="seatJourneyBanner">
+    <div>
+      <strong id="seatOperatorName">Express Rail #2150</strong>
+      <span id="seatClassTag" class="tag-pill">AC Business</span>
+    </div>
+    <span id="seatSelectedSummary">No seats selected</span>
+  </div>
+
+  <div class="seats-layout">
+    <div class="seat-map-panel">
+      <div class="seat-map-head">
+        <h3>Select your seats</h3>
+        <p>Tap an available seat to select or deselect it.</p>
+      </div>
+
+      <div class="coach-tabs" id="coachTabs">
+        <button class="coach-tab active-coach" data-coach="C1">Coach C1</button>
+        <button class="coach-tab" data-coach="C2">Coach C2</button>
+        <button class="coach-tab" data-coach="C3">Coach C3</button>
+      </div>
+
+      <div class="seat-legend">
+        <span><i class="legend-swatch legend-available"></i> Available</span>
+        <span><i class="legend-swatch legend-selected"></i> Selected</span>
+        <span><i class="legend-swatch legend-occupied"></i> Occupied</span>
+        <span><i class="legend-swatch legend-women"></i> Women only</span>
+      </div>
+
+      <div class="seat-map" id="seatMap" role="group" aria-label="Seat map"></div>
+    </div>
+
+    <aside class="fare-summary-panel">
+      <h3>Fare summary</h3>
+      <div class="fare-row"><span>Base fare (<span id="fareCount">0</span> × $0)</span><span id="fareBase">$0.00</span></div>
+      <div class="fare-row"><span>Taxes &amp; GST</span><span id="fareTax">$0.00</span></div>
+      <div class="fare-row"><span>Convenience fee</span><span id="fareConv">$0.00</span></div>
+      <div class="fare-row"><span>Seat selection</span><span>Included</span></div>
+      <div class="fare-row fare-total"><span>Total payable</span><span id="fareTotal">$0.00</span></div>
+      <p class="fare-note">Free cancellation available up to 24 hours before departure.</p>
+      <button class="btn-primary btn-block" id="proceedToDetailsBtn" disabled>Continue to passenger details</button>
+    </aside>
+  </div>
+</section>
+
+<section class="view" id="view-details" data-view="details">
+  <div class="progress-rail">
+    <div class="progress-step done" data-step="1"><span class="step-dot">✓</span><span>Search</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done" data-step="2"><span class="step-dot">✓</span><span>Select</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done" data-step="3"><span class="step-dot">✓</span><span>Details</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step current" data-step="4"><span class="step-dot">4</span><span>Payment</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step" data-step="5"><span class="step-dot">5</span><span>Confirmation</span></div>
+  </div>
+
+  <div class="details-layout">
+    <div class="details-form-panel">
+      <h3>Passenger details</h3>
+      <p class="form-hint">Please provide government-approved ID details for all travelers.</p>
+      <form id="passengerForm"><div id="passengerFieldsWrap"></div></form>
+
+      <div class="contact-block">
+        <h4>Ticket dispatch contact</h4>
+        <div class="field-row">
+          <div class="field">
+            <label for="contactEmail">Email address</label>
+            <input type="email" id="contactEmail" placeholder="you@example.com" required>
+          </div>
+          <div class="field">
+            <label for="contactPhone">Mobile number</label>
+            <input type="tel" id="contactPhone" placeholder="+1 (555) 000-0000" required>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="fare-summary-panel">
+      <h3>Trip summary</h3>
+      <div class="trip-summary-card" id="detailsTripSummary"></div>
+      <div class="fare-row fare-total"><span>Total payable</span><span id="detailsFareTotal">$0.00</span></div>
+      <button class="btn-primary btn-block" id="proceedToPaymentBtn">Continue to payment</button>
+      <button class="btn-ghost-sm btn-block" id="backToSeatsBtn">Back to seat selection</button>
+    </aside>
+  </div>
+</section>
+
+<section class="view" id="view-payment" data-view="payment">
+  <div class="progress-rail">
+    <div class="progress-step done" data-step="1"><span class="step-dot">✓</span><span>Search</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done" data-step="2"><span class="step-dot">✓</span><span>Select</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done" data-step="3"><span class="step-dot">✓</span><span>Details</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done" data-step="4"><span class="step-dot">✓</span><span>Payment</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step current" data-step="5"><span class="step-dot">5</span><span>Confirmation</span></div>
+  </div>
+
+  <div class="details-layout">
+    <div class="details-form-panel">
+      <h3>Choose a payment method</h3>
+      <div class="pay-methods" role="radiogroup" aria-label="Payment method">
+        <label class="pay-method active-pay">
+          <input type="radio" name="payMethod" value="card" checked>
+          <span class="pay-icon">💳</span><span>Credit / Debit Card</span>
+        </label>
+        <label class="pay-method">
+          <input type="radio" name="payMethod" value="upi">
+          <span class="pay-icon">📱</span><span>UPI</span>
+        </label>
+        <label class="pay-method">
+          <input type="radio" name="payMethod" value="wallet">
+          <span class="pay-icon">👛</span><span>Wallet</span>
+        </label>
+        <label class="pay-method">
+          <input type="radio" name="payMethod" value="netbanking">
+          <span class="pay-icon">🏦</span><span>Net Banking</span>
+        </label>
+      </div>
+
+      <div class="pay-panel" id="payPanel"></div>
+
+      <div class="coupon-row">
+        <input type="text" id="couponInput" placeholder="Enter coupon code">
+        <button class="btn-ghost-sm" id="applyCouponBtn">Apply</button>
+        <span id="couponMsg"></span>
+      </div>
+    </div>
+
+    <aside class="fare-summary-panel">
+      <h3>Order summary</h3>
+      <div class="trip-summary-card" id="paymentTripSummary"></div>
+      <div class="fare-row"><span>Subtotal</span><span id="paySubtotal">$0.00</span></div>
+      <div class="fare-row" id="payDiscountRow" style="display:none;"><span>Coupon discount</span><span id="payDiscount">-$0.00</span></div>
+      <div class="fare-row fare-total"><span>Total payable</span><span id="payFareTotal">$0.00</span></div>
+      <button class="btn-primary btn-block" id="payNowBtn">Pay now</button>
+      <button class="btn-ghost-sm btn-block" id="backToDetailsBtn">Back to passenger details</button>
+    </aside>
+  </div>
+</section>
+
+<section class="view" id="view-confirmation" data-view="confirmation">
+  <div class="progress-rail">
+    <div class="progress-step done" data-step="1"><span class="step-dot">✓</span><span>Search</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done" data-step="2"><span class="step-dot">✓</span><span>Select</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done" data-step="3"><span class="step-dot">✓</span><span>Details</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done" data-step="4"><span class="step-dot">✓</span><span>Payment</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step done current" data-step="5"><span class="step-dot">✓</span><span>Confirmation</span></div>
+  </div>
+
+  <div class="confirm-banner">
+    <div>
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="white" fill-opacity="0.18"/><path d="M7 13.5l4 4 8-9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>
+        <strong>Booking confirmed successfully!</strong>
+        <span>E-ticket sent to <span id="confirmEmail">you@example.com</span> and via SMS.</span>
+      </div>
+    </div>
+    <div class="pnr-box">
+      <span>PNR number</span>
+      <strong id="confirmPnr">TR-000000</strong>
+    </div>
+  </div>
+
+  <div class="eticket-card">
+    <div class="eticket-head">
+      <div>
+        <strong id="ticketOperator">Express Rail #2150</strong>
+        <span id="ticketClass">Coach C4 • Reserved seating</span>
+      </div>
+      <span class="tag-pill tag-pill-verified">Verified e-ticket</span>
+    </div>
+
+    <div class="eticket-body">
+      <div class="eticket-route">
+        <div>
+          <span class="et-label">Departure</span>
+          <strong id="ticketFrom">New York (NYP)</strong>
+          <span id="ticketDepTime">Oct 24, 2026 • 06:15 AM</span>
+        </div>
+        <div class="et-line"><span id="ticketDuration">2h 55m</span><div class="et-track"></div><span>Direct</span></div>
+        <div>
+          <span class="et-label">Arrival</span>
+          <strong id="ticketTo">Washington (WAS)</strong>
+          <span id="ticketArrTime">Oct 24, 2026 • 09:10 AM</span>
+        </div>
+      </div>
+
+      <div class="eticket-qr">
+        <div class="qr-graphic" aria-label="QR code" role="img"></div>
+        <span class="barcode" aria-hidden="true">▌▌│▌▌▌│▌│▌▌│▌│▌▌▌│▌│▌</span>
+        <span>Scan at boarding gate</span>
+      </div>
+    </div>
+
+    <div class="eticket-passengers" id="ticketPassengers"></div>
+
+    <div class="eticket-actions">
+      <button class="btn-primary" id="downloadTicketBtn">Download e-ticket (PDF)</button>
+      <button class="btn-ghost-sm" id="printTicketBtn">Print ticket</button>
+      <button class="btn-ghost-sm" id="walletTicketBtn">Add to wallet</button>
+      <button class="btn-danger-outline" id="cancelFromConfirmBtn">Reschedule / Cancel</button>
+    </div>
+
+    <div class="eticket-info-grid">
+      <div>
+        <strong>Station platform &amp; directions</strong>
+        <p>Please arrive at least 20 minutes prior to departure. Check the departure board for your platform assignment on arrival.</p>
+        <a href="#" class="link-more">View station map →</a>
+      </div>
+      <div>
+        <strong>Real-time status</strong>
+        <p>Track live location, speed, and platform changes starting 1 hour before departure.</p>
+        <a href="#" class="link-more">Open live tracker →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-footer-actions">
+    <button class="btn-secondary" id="goToBookingsBtn">Go to My Bookings</button>
+    <button class="btn-ghost-sm" id="bookAnotherBtn">Book another trip</button>
+  </div>
+</section>
+
+<section class="view" id="view-bookings" data-view="bookings">
+  <div class="bookings-head">
+    <div>
+      <span class="tag-pill">Dashboard • Updated live</span>
+      <h2>My bookings &amp; tickets</h2>
+      <p>Manage your upcoming transits, view past ticket history, and download boarding passes.</p>
+    </div>
+    <div class="bookings-stats">
+      <div class="stat-card"><strong id="statUpcoming">2</strong><span>Upcoming trips</span></div>
+      <div class="stat-card stat-green"><strong>1,420</strong><span>Reward points</span></div>
+    </div>
+  </div>
+
+  <div class="bookings-tabs" role="tablist">
+    <button class="booking-tab active-tab" data-tab="upcoming" role="tab" aria-selected="true">Upcoming journeys <span id="tabCountUpcoming">2</span></button>
+    <button class="booking-tab" data-tab="completed" role="tab" aria-selected="false">Completed trips <span>12</span></button>
+    <button class="booking-tab" data-tab="cancelled" role="tab" aria-selected="false">Cancelled trips <span>1</span></button>
+  </div>
+
+  <div class="bookings-list" id="bookingsList"></div>
+</section>
+
+<section class="view" id="view-pnr" data-view="pnr">
+  <div class="narrow-panel">
+    <h2>Check PNR status</h2>
+    <p>Enter your 10-digit PNR number to view live journey and seat status.</p>
+    <form id="pnrForm" class="pnr-form">
+      <input type="text" id="pnrInput" placeholder="e.g. TR-984210" required>
+      <button type="submit" class="btn-primary">Check status</button>
+    </form>
+    <div id="pnrResult" class="pnr-result" hidden></div>
+  </div>
+</section>
+
+<section class="view" id="view-login" data-view="login">
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active-tab" data-auth="login">Log in</button>
+      <button class="auth-tab" data-auth="signup">Sign up</button>
+    </div>
+
+    <div class="auth-panel" id="authPanel">
+      <form id="phoneForm">
+        <div class="field">
+          <label for="phoneInput">Mobile number</label>
+          <input type="tel" id="phoneInput" placeholder="+1 (555) 000-0000" required>
+        </div>
+        <button type="submit" class="btn-primary btn-block">Send OTP</button>
+      </form>
+
+      <form id="otpForm" hidden>
+        <p class="form-hint">Enter the 4-digit code sent to your mobile.</p>
+        <div class="otp-row">
+          <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+          <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+          <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+          <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+        </div>
+        <button type="submit" class="btn-primary btn-block">Verify &amp; continue</button>
+        <button type="button" class="link-more" id="resendOtpBtn">Resend code</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="view-help" data-view="help">
+  <div class="help-hero">
+    <h2>How can we help your journey today?</h2>
+    <p>Search our knowledge base, track a complaint, or connect instantly with our 24/7 support specialists.</p>
+    <div class="help-search">
+      <input type="text" placeholder="Search for refunds, PNR status, luggage policy...">
+      <button class="btn-primary">Search</button>
+    </div>
+  </div>
+
+  <div class="help-topics">
+    <div class="topic-card">
+      <span class="topic-icon topic-blue">🎫</span>
+      <strong>Booking &amp; ticketing</strong>
+      <p>Policies, reservation modifications, group bookings, and fare rules.</p>
+      <a href="#" class="link-more">Explore topics →</a>
+    </div>
+    <div class="topic-card">
+      <span class="topic-icon topic-red">↩️</span>
+      <strong>Cancellations &amp; refunds</strong>
+      <p>Refund timelines, cancellation fees, failed transaction reversals.</p>
+      <a href="#" class="link-more">Explore topics →</a>
+    </div>
+    <div class="topic-card">
+      <span class="topic-icon topic-green">📡</span>
+      <strong>PNR &amp; live status</strong>
+      <p>Check chart preparation, seat status, platform changes and delays.</p>
+      <a href="#" class="link-more">Explore topics →</a>
+    </div>
+    <div class="topic-card">
+      <span class="topic-icon topic-orange">💳</span>
+      <strong>Payments &amp; wallet</strong>
+      <p>Credits, payment gateways, secure checkout, and promo codes.</p>
+      <a href="#" class="link-more">Explore topics →</a>
+    </div>
+  </div>
+
+  <div class="faq-section">
+    <h3>Frequently asked questions</h3>
+    <div class="faq-list" id="faqList"></div>
+  </div>
+
+  <div class="contact-options">
+    <div class="contact-card">
+      <strong>Live chat support</strong>
+      <p>Chat instantly with a virtual assistant or connect to a live human agent in seconds.</p>
+      <button class="btn-primary">Start live chat</button>
+    </div>
+    <div class="contact-card">
+      <strong>Phone assistance</strong>
+      <p>Speak directly with our ticketing desk for emergency cancellations or schedule guidance.</p>
+      <button class="btn-secondary">1-800-555-TRANSIT</button>
+    </div>
+    <div class="contact-card">
+      <strong>Email &amp; tickets</strong>
+      <p>Submit detailed documentation, corporate billing enquiries, or baggage claims.</p>
+      <button class="btn-secondary">Open support ticket</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 TransitGo Inc. All rights reserved.</span>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+const state = {
+  mode: "train",
+  from: "New Delhi (NDLS)",
+  to: "Agra Cantt (AGC)",
+  date: "",
+  pax: "1 Adult, Economy",
+  selectedResult: null,
+  selectedSeats: [],
+  currentCoach: "C1",
+  occupiedSeats: {C1:["1A","3C","5B"],C2:["2A","2B","6C"],C3:["1C","4A","4B"]},
+  womenSeats: {C1:["6C","6D"],C2:["7A"],C3:["3C"]},
+  passengers: [],
+  couponApplied: null,
+  bookingsData: null
+};
+
+const STATIONS = [
+  {name:"New Delhi (NDLS)", sub:"New Delhi, India"},
+  {name:"Agra Cantt (AGC)", sub:"Agra, India"},
+  {name:"Mumbai Central (BCT)", sub:"Mumbai, India"},
+  {name:"Bengaluru City (SBC)", sub:"Bengaluru, India"},
+  {name:"Chennai Central (MAS)", sub:"Chennai, India"},
+  {name:"Kolkata (HWH)", sub:"Howrah, India"},
+  {name:"Lucknow (LKO)", sub:"Lucknow, India"},
+  {name:"Jaipur (JP)", sub:"Jaipur, India"},
+  {name:"New York (NYP)", sub:"New York, USA"},
+  {name:"Washington (WAS)", sub:"Washington DC, USA"},
+  {name:"Boston (BOS)", sub:"Boston, USA"},
+  {name:"Philadelphia (PHL)", sub:"Philadelphia, USA"}
+];
+
+const RESULTS = [
+  {id:1, mode:"train", operator:"Gatimaan Express", num:"#12050", cls:"AC Chair Car", price:28.5, dep:"06:15 AM", arr:"09:10 AM", durationMin:175, durationTxt:"2h 55m", fromCode:"NDLS", toCode:"AGC", stops:"No intermediate stops", seatsLeft:42, amenities:["Free Wi-Fi","Meal included"], badge:"Fastest", am:{ac:true,sleeper:false,wifi:true,meal:true}},
+  {id:2, mode:"train", operator:"Shatabdi Express", num:"#12002", cls:"AC Executive Chair", price:34.0, dep:"07:20 AM", arr:"10:05 AM", durationMin:165, durationTxt:"2h 45m", fromCode:"NDLS", toCode:"AGC", stops:"1 stop", seatsLeft:26, amenities:["Free Wi-Fi","Meal included"], badge:"", am:{ac:true,sleeper:false,wifi:true,meal:true}},
+  {id:3, mode:"train", operator:"Taj Express", num:"#12280", cls:"AC 3-Tier", price:18.0, dep:"07:10 AM", arr:"10:35 AM", durationMin:205, durationTxt:"3h 25m", fromCode:"NDLS", toCode:"AGC", stops:"2 stops", seatsLeft:64, amenities:["Charging Port"], badge:"", am:{ac:true,sleeper:true,wifi:false,meal:false}},
+  {id:4, mode:"train", operator:"Rajdhani Express", num:"#12954", cls:"AC 2-Tier Sleeper", price:42.0, dep:"04:25 PM", arr:"07:15 PM", durationMin:170, durationTxt:"2h 50m", fromCode:"NDLS", toCode:"AGC", stops:"Non-stop", seatsLeft:15, amenities:["Free Wi-Fi","Meal included","Bedding"], badge:"Premium", am:{ac:true,sleeper:true,wifi:true,meal:true}},
+  {id:5, mode:"train", operator:"Kerala Express", num:"#12626", cls:"Sleeper Class", price:9.5, dep:"11:35 PM", arr:"03:20 AM", durationMin:225, durationTxt:"3h 45m", fromCode:"NDLS", toCode:"AGC", stops:"4 stops", seatsLeft:120, amenities:["Charging Port"], badge:"Budget", am:{ac:false,sleeper:true,wifi:false,meal:false}},
+  {id:6, mode:"train", operator:"Intercity Express", num:"#14853", cls:"AC Chair Car", price:22.0, dep:"01:15 PM", arr:"04:40 PM", durationMin:205, durationTxt:"3h 25m", fromCode:"NDLS", toCode:"AGC", stops:"2 stops", seatsLeft:38, amenities:["Free Wi-Fi"], badge:"", am:{ac:true,sleeper:false,wifi:true,meal:false}},
+  {id:7, mode:"train", operator:"Punjab Mail", num:"#12138", cls:"Sleeper Class", price:11.0, dep:"09:05 PM", arr:"12:50 AM", durationMin:225, durationTxt:"3h 45m", fromCode:"NDLS", toCode:"AGC", stops:"3 stops", seatsLeft:80, amenities:[], badge:"", am:{ac:false,sleeper:true,wifi:false,meal:false}},
+  {id:8, mode:"train", operator:"Duronto Express", num:"#12280A", cls:"AC First Class", price:56.0, dep:"05:45 AM", arr:"08:20 AM", durationMin:155, durationTxt:"2h 35m", fromCode:"NDLS", toCode:"AGC", stops:"Non-stop", seatsLeft:9, amenities:["Free Wi-Fi","Meal included","Bedding"], badge:"Luxury", am:{ac:true,sleeper:true,wifi:true,meal:true}},
+
+  {id:9, mode:"bus", operator:"IntrCity SmartBus", num:"Volvo A/C", cls:"Seater/Sleeper", price:6.0, dep:"09:30 AM", arr:"01:15 PM", durationMin:225, durationTxt:"3h 45m", fromCode:"ISBT", toCode:"IDG", stops:"Express way", seatsLeft:12, amenities:["Free Wi-Fi","Charging Port"], badge:"Popular", am:{ac:true,sleeper:true,wifi:true,meal:false}},
+  {id:10, mode:"bus", operator:"RedBus Travels", num:"#RB-221", cls:"AC Sleeper Coach", price:5.2, dep:"10:00 AM", arr:"02:15 PM", durationMin:255, durationTxt:"4h 15m", fromCode:"ISBT", toCode:"IDG", stops:"Non-stop service", seatsLeft:8, amenities:["Charging Port","A/C"], badge:"Best Value", am:{ac:true,sleeper:true,wifi:false,meal:false}},
+  {id:11, mode:"bus", operator:"Zingbus Premium", num:"#ZB-410", cls:"AC Seater", price:7.5, dep:"06:00 AM", arr:"09:20 AM", durationMin:200, durationTxt:"3h 20m", fromCode:"ISBT", toCode:"IDG", stops:"Non-stop service", seatsLeft:20, amenities:["Free Wi-Fi","Charging Port","Blanket"], badge:"", am:{ac:true,sleeper:false,wifi:true,meal:false}},
+  {id:12, mode:"bus", operator:"Orange Tours & Travels", num:"#OT-88", cls:"Non-AC Seater", price:3.5, dep:"08:00 AM", arr:"12:10 PM", durationMin:250, durationTxt:"4h 10m", fromCode:"ISBT", toCode:"IDG", stops:"3 stops", seatsLeft:34, amenities:[], badge:"Budget", am:{ac:false,sleeper:false,wifi:false,meal:false}},
+  {id:13, mode:"bus", operator:"VRL Travels", num:"#VR-556", cls:"AC Sleeper", price:8.0, dep:"11:00 PM", arr:"03:00 AM", durationMin:240, durationTxt:"4h 00m", fromCode:"ISBT", toCode:"IDG", stops:"Non-stop service", seatsLeft:6, amenities:["Charging Port","Blanket"], badge:"", am:{ac:true,sleeper:true,wifi:false,meal:false}},
+  {id:14, mode:"bus", operator:"Neeta Travels", num:"#NT-303", cls:"AC Seater/Sleeper", price:6.8, dep:"02:30 PM", arr:"06:35 PM", durationMin:245, durationTxt:"4h 05m", fromCode:"ISBT", toCode:"IDG", stops:"1 stop", seatsLeft:16, amenities:["Free Wi-Fi","Charging Port"], badge:"", am:{ac:true,sleeper:true,wifi:true,meal:false}},
+  {id:15, mode:"bus", operator:"Patel Tours", num:"#PT-77", cls:"Non-AC Sleeper", price:4.2, dep:"10:45 PM", arr:"03:00 AM", durationMin:255, durationTxt:"4h 15m", fromCode:"ISBT", toCode:"IDG", stops:"2 stops", seatsLeft:22, amenities:["Charging Port"], badge:"", am:{ac:false,sleeper:true,wifi:false,meal:false}},
+  {id:16, mode:"bus", operator:"SRS Travels", num:"#SR-902", cls:"AC Seater", price:9.0, dep:"05:15 AM", arr:"08:30 AM", durationMin:195, durationTxt:"3h 15m", fromCode:"ISBT", toCode:"IDG", stops:"Non-stop service", seatsLeft:28, amenities:["Free Wi-Fi","Meal included"], badge:"Fastest", am:{ac:true,sleeper:false,wifi:true,meal:true}}
+];
+
+const FAQS = [
+  {q:"How long does it take for a refund to reflect in my bank account?", a:"Refunds are typically processed within 5-7 business days, depending on your bank's processing time."},
+  {q:"Can I modify my travel date or time after my ticket is confirmed?", a:"Yes, you can reschedule from My Bookings up to 24 hours before departure, subject to a small rescheduling fee."},
+  {q:"What should I do if my train or bus is delayed by more than 2 hours?", a:"You're eligible for a partial refund or free rescheduling. Contact live support with your PNR for immediate assistance."},
+  {q:"How do I access my digital ticket if I don't have internet connectivity?", a:"Download the e-ticket PDF in advance, or use Add to Wallet so it's available offline on your phone."},
+  {q:"Are there any hidden fees when paying with international cards?", a:"No hidden fees — the fare breakdown always shows base fare, taxes, and a fixed convenience fee before you pay."}
+];
+
+function $(sel, ctx){return (ctx||document).querySelector(sel);}
+function $all(sel, ctx){return Array.from((ctx||document).querySelectorAll(sel));}
+function fmt(n){return "$" + n.toFixed(2);}
+function showToast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+function genPnr(){
+  const prefix = state.mode === "train" ? "TR" : "BS";
+  return prefix + "-" + Math.floor(100000 + Math.random()*899999);
+}
+
+function goTo(viewName){
+  $all(".view").forEach(v => v.classList.remove("active"));
+  const target = document.getElementById("view-" + viewName);
+  if(target) target.classList.add("active");
+  $all(".nav-link, .mobile-nav a").forEach(a=>{
+    a.classList.toggle("active-nav", a.dataset.nav === viewName);
+  });
+  window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
+  document.getElementById("mobileNav").classList.remove("open");
+  document.getElementById("hamburgerBtn").setAttribute("aria-expanded","false");
+}
+
+document.addEventListener("click", (e)=>{
+  const navEl = e.target.closest("[data-nav]");
+  if(navEl){
+    e.preventDefault();
+    const view = navEl.dataset.nav;
+    if(view === "search"){ renderResults(); }
+    if(view === "bookings"){ renderBookings("upcoming"); }
+    if(view === "help"){ /* faq already rendered on load */ }
+    goTo(view);
+  }
+});
+
+$("#hamburgerBtn").addEventListener("click", ()=>{
+  const nav = $("#mobileNav");
+  const open = nav.classList.toggle("open");
+  $("#hamburgerBtn").setAttribute("aria-expanded", open ? "true":"false");
+});
+
+function setMode(mode){
+  state.mode = mode;
+  $all(".mode-btn-mini").forEach(b=>{
+    b.classList.toggle("active-mode", b.dataset.mode===mode);
+    b.setAttribute("aria-pressed", b.dataset.mode===mode ? "true":"false");
+  });
+  $all(".mode-btn").forEach(b=>{
+    b.classList.toggle("active-mode", b.dataset.mode===mode);
+    b.setAttribute("aria-pressed", b.dataset.mode===mode ? "true":"false");
+  });
+  const trainFilterChip = $('[data-filter-mode="train"]');
+  const busFilterChip = $('[data-filter-mode="bus"]');
+  if(trainFilterChip && busFilterChip){
+    trainFilterChip.classList.toggle("active-chip", mode==="train");
+    busFilterChip.classList.toggle("active-chip", mode==="bus");
+  }
+}
+$all(".mode-btn-mini, .mode-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=> setMode(btn.dataset.mode));
+});
+
+function setupAutocomplete(inputId, listId){
+  const input = $("#"+inputId);
+  const list = $("#"+listId);
+  input.addEventListener("input", ()=>{
+    const val = input.value.trim().toLowerCase();
+    if(!val){ list.hidden = true; list.innerHTML=""; return; }
+    const matches = STATIONS.filter(s => s.name.toLowerCase().includes(val) || s.sub.toLowerCase().includes(val)).slice(0,6);
+    if(!matches.length){ list.hidden = true; return; }
+    list.innerHTML = matches.map(m => `<li role="option">${m.name}<small>${m.sub}</small></li>`).join("");
+    list.hidden = false;
+    $all("li", list).forEach((li, i)=>{
+      li.addEventListener("click", ()=>{
+        input.value = matches[i].name;
+        list.hidden = true;
+      });
+    });
+  });
+  input.addEventListener("blur", ()=> setTimeout(()=>{ list.hidden = true; }, 150));
+  input.addEventListener("focus", ()=>{ if(input.value) input.dispatchEvent(new Event("input")); });
+}
+setupAutocomplete("fromInput","fromList");
+setupAutocomplete("toInput","toList");
+
+$("#swapBtn").addEventListener("click", ()=>{
+  const f = $("#fromInput"), t = $("#toInput");
+  const tmp = f.value; f.value = t.value; t.value = tmp;
+});
+
+// default date = today + 7
+(function initDate(){
+  const d = new Date();
+  d.setDate(d.getDate()+7);
+  $("#dateInput").value = d.toISOString().slice(0,10);
+})();
+
+$("#searchForm").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  state.from = $("#fromInput").value;
+  state.to = $("#toInput").value;
+  state.date = $("#dateInput").value;
+  state.pax = $("#paxInput").value;
+  renderResults();
+  goTo("search");
+});
+
+function updateSummaryBar(){
+  $("#sumFrom").textContent = state.from;
+  $("#sumTo").textContent = state.to;
+  const d = state.date ? new Date(state.date + "T00:00:00") : new Date();
+  $("#sumDate").textContent = d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+  $("#sumPax").textContent = state.pax;
+}
+$("#modifySearchBtn").addEventListener("click", ()=> goTo("home"));
+
+function getFilteredSortedResults(){
+  const priceMax = parseInt($("#priceRange").value, 10);
+  const activeOperators = $all("#operatorFilters input:checked").map(i=>i.dataset.op);
+  const timeFilters = $all('[data-time]:checked').map(i=>i.dataset.time);
+  const amenityFilters = $all('[data-am]:checked').map(i=>i.dataset.am);
+
+  let list = RESULTS.filter(r => r.mode === state.mode);
+  list = list.filter(r => r.price <= priceMax);
+  const allOpChecked = $all("#operatorFilters input").every(i=>i.checked);
+  if(activeOperators.length && !allOpChecked){
+    list = list.filter(r => activeOperators.includes(r.operator));
+  }
+  if(timeFilters.length){
+    list = list.filter(r=>{
+      const hour = parseTimeToHour(r.dep);
+      return timeFilters.some(tf=>{
+        if(tf==="morning") return hour>=6 && hour<12;
+        if(tf==="afternoon") return hour>=12 && hour<18;
+        if(tf==="evening") return hour>=18 && hour<24;
+        if(tf==="night") return hour>=0 && hour<6;
+        return false;
+      });
+    });
+  }
+  if(amenityFilters.length){
+    list = list.filter(r => amenityFilters.every(a => r.am[a]));
+  }
+
+  const sortBy = $("#sortSelect").value;
+  list = [...list];
+  if(sortBy==="price") list.sort((a,b)=>a.price-b.price);
+  else if(sortBy==="duration") list.sort((a,b)=>a.durationMin-b.durationMin);
+  else list.sort((a,b)=>parseTimeToHour(a.dep)-parseTimeToHour(b.dep));
+  return list;
+}
+function parseTimeToHour(t){
+  const m = t.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if(!m) return 0;
+  let h = parseInt(m[1],10);
+  const mer = m[3].toUpperCase();
+  if(mer==="PM" && h!==12) h+=12;
+  if(mer==="AM" && h===12) h=0;
+  return h;
+}
+
+function renderResults(){
+  updateSummaryBar();
+  const list = getFilteredSortedResults();
+  $("#resultsCount").textContent = `Showing ${list.length} available journey${list.length===1?"":"s"}`;
+  const wrap = $("#resultsList");
+  if(!list.length){
+    wrap.innerHTML = `<div class="result-card" style="text-align:center;color:var(--text-2)">No journeys match your filters. Try widening your price range or clearing a filter.</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(r=>`
+    <div class="result-card" data-id="${r.id}">
+      <div class="result-top">
+        <div class="result-op">
+          <span class="result-icon">${r.mode==="train"?"🚆":"🚌"}</span>
+          <div>
+            <strong>${r.operator} <span style="color:var(--text-3);font-weight:500;font-size:.85rem">${r.num}</span></strong>
+            ${r.badge ? `<span class="result-badge">${r.badge}</span>`:""}
+            <span>${r.cls}</span>
+          </div>
+        </div>
+        <div class="result-price">
+          <strong>${fmt(r.price)}</strong>
+          <span>onwards</span>
+        </div>
+      </div>
+      <div class="result-timeline">
+        <div><span class="t-time">${r.dep}</span><span class="t-place">${r.fromCode}</span></div>
+        <div class="t-mid">${r.durationTxt}<div class="t-track"></div>${r.stops}</div>
+        <div style="text-align:right"><span class="t-time">${r.arr}</span><span class="t-place">${r.toCode}</span></div>
+      </div>
+      <div class="result-bottom">
+        <div class="result-tags">
+          <span class="tag-soft tag-avail">${r.seatsLeft} seats left</span>
+          <div class="result-amenities">${r.amenities.map(a=>`<span>${a}</span>`).join("")}</div>
+        </div>
+        <button class="book-now-btn" data-select="${r.id}">Select seat</button>
+      </div>
+    </div>
+  `).join("");
+
+  $all("[data-select]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const r = RESULTS.find(x=>x.id === parseInt(btn.dataset.select,10));
+      state.selectedResult = r;
+      state.selectedSeats = [];
+      state.currentCoach = "C1";
+      renderSeatView();
+      goTo("seats");
+    });
+  });
+}
+
+$("#priceRange").addEventListener("input", (e)=>{
+  $("#priceRangeLabel").textContent = `$3 – $${e.target.value}`;
+  renderResults();
+});
+$("#sortSelect").addEventListener("change", renderResults);
+$all('[data-filter-mode]').forEach(chip=>{
+  chip.addEventListener("click", ()=>{ setMode(chip.dataset.filterMode); renderResults(); });
+});
+$all('[data-time], [data-am], #operatorFilters input').forEach(inp=>{
+  inp.addEventListener("change", renderResults);
+});
+$("#resetFilters").addEventListener("click", ()=>{
+  $all('[data-time], [data-am]').forEach(i=>i.checked=false);
+  $all('#operatorFilters input').forEach(i=>i.checked=true);
+  $("#priceRange").value = 60;
+  $("#priceRangeLabel").textContent = "$3 – $60";
+  renderResults();
+});
+
+function renderSeatView(){
+  const r = state.selectedResult;
+  if(!r) return;
+  $("#seatOperatorName").textContent = `${r.operator} ${r.num}`;
+  $("#seatClassTag").textContent = r.cls;
+  renderSeatMap();
+  updateSeatFareSummary();
+}
+
+$all(".coach-tab").forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    $all(".coach-tab").forEach(t=>t.classList.remove("active-coach"));
+    tab.classList.add("active-coach");
+    state.currentCoach = tab.dataset.coach;
+    renderSeatMap();
+  });
+});
+
+function renderSeatMap(){
+  const coach = state.currentCoach;
+  const occupied = state.occupiedSeats[coach] || [];
+  const women = state.womenSeats[coach] || [];
+  const rows = 6;
+  const cols = ["A","B","C","D"];
+  let html = "";
+  for(let i=1;i<=rows;i++){
+    html += `<div class="seat-row">`;
+    ["A","B"].forEach(c=>html += seatHtml(i, c, coach, occupied, women));
+    html += `<div class="aisle-gap"></div>`;
+    ["C","D"].forEach(c=>html += seatHtml(i, c, coach, occupied, women));
+    html += `</div>`;
+  }
+  $("#seatMap").innerHTML = html;
+  $all(".seat").forEach(s=>{
+    s.addEventListener("click", ()=>toggleSeat(s));
+  });
+}
+function seatHtml(row, col, coach, occupied, women){
+  const id = `${row}${col}`;
+  const isOccupied = occupied.includes(id);
+  const isWomen = women.includes(id) && !isOccupied;
+  const isSelected = state.selectedSeats.some(s=>s.coach===coach && s.id===id);
+  let cls = "seat";
+  if(isOccupied) cls += " occupied";
+  else if(isSelected) cls += " selected";
+  else if(isWomen) cls += " women-only";
+  return `<button type="button" class="${cls}" data-seat="${id}" ${isOccupied?"disabled aria-disabled='true'":""} aria-label="Seat ${id}${isOccupied?' occupied':isSelected?' selected':''}">${id}</button>`;
+}
+function toggleSeat(el){
+  if(el.classList.contains("occupied")) return;
+  const id = el.dataset.seat;
+  const coach = state.currentCoach;
+  const idx = state.selectedSeats.findIndex(s=>s.coach===coach && s.id===id);
+  if(idx>-1){
+    state.selectedSeats.splice(idx,1);
+  } else {
+    if(state.selectedSeats.length >= 6){
+      showToast("You can select up to 6 seats per booking.");
+      return;
+    }
+    state.selectedSeats.push({coach, id});
+  }
+  renderSeatMap();
+  updateSeatFareSummary();
+}
+function updateSeatFareSummary(){
+  const r = state.selectedResult;
+  const count = state.selectedSeats.length;
+  const base = count * (r ? r.price : 0);
+  const tax = base * 0.07;
+  const conv = count ? 4.5 : 0;
+  const total = base + tax + conv;
+
+  $("#fareCount").textContent = count;
+  $("#fareBase").textContent = fmt(base);
+  document.querySelector('label[for=""]');
+  $all(".fare-row span")[0]; // no-op guard
+  $("#fareBase").parentElement.querySelector("span").textContent = `Base fare (${count} × ${fmt(r?r.price:0)})`;
+  $("#fareTax").textContent = fmt(tax);
+  $("#fareConv").textContent = fmt(conv);
+  $("#fareTotal").textContent = fmt(total);
+
+  const summaryTxt = count ? `${count} seat${count>1?"s":""} selected: ${state.selectedSeats.map(s=>s.coach+"-"+s.id).join(", ")}` : "No seats selected";
+  $("#seatSelectedSummary").textContent = summaryTxt;
+
+  $("#proceedToDetailsBtn").disabled = count === 0;
+  state.fareTotal = total;
+  state.fareBase = base;
+  state.fareTax = tax;
+  state.fareConv = conv;
+}
+
+$("#proceedToDetailsBtn").addEventListener("click", ()=>{
+  buildPassengerForm();
+  goTo("details");
+});
+
+function buildPassengerForm(){
+  const wrap = $("#passengerFieldsWrap");
+  wrap.innerHTML = state.selectedSeats.map((seat, i)=>`
+    <div class="passenger-block">
+      <h4>Passenger ${i+1} · Seat ${seat.coach}-${seat.id}</h4>
+      <div class="field-row">
+        <div class="field">
+          <label for="paxName${i}">Full name (as per ID)</label>
+          <input type="text" id="paxName${i}" required>
+        </div>
+        <div class="field-row-3" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="field">
+            <label for="paxAge${i}">Age</label>
+            <input type="number" id="paxAge${i}" min="1" max="120" required>
+          </div>
+          <div class="field">
+            <label for="paxGender${i}">Gender</label>
+            <select id="paxGender${i}">
+              <option>Male</option><option>Female</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="field-row" style="margin-top:12px;">
+        <div class="field">
+          <label for="paxIdType${i}">ID proof type</label>
+          <select id="paxIdType${i}">
+            <option>Passport</option><option>Driving License</option><option>National ID</option><option>Aadhaar</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="paxIdNum${i}">ID number</label>
+          <input type="text" id="paxIdNum${i}" required>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  updateTripSummaryCard("#detailsTripSummary");
+  $("#detailsFareTotal").textContent = fmt(state.fareTotal || 0);
+}
+
+function updateTripSummaryCard(sel){
+  const r = state.selectedResult;
+  if(!r) return;
+  $(sel).innerHTML = `
+    <strong>${r.operator} ${r.num} · ${r.cls}</strong>
+    ${state.from} → ${state.to}<br>
+    ${state.date ? new Date(state.date+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}) : ""} · ${r.dep} – ${r.arr}<br>
+    Seats: ${state.selectedSeats.map(s=>s.coach+"-"+s.id).join(", ")}
+  `;
+}
+
+$("#backToSeatsBtn").addEventListener("click", ()=> goTo("seats"));
+
+$("#proceedToPaymentBtn").addEventListener("click", (e)=>{
+  e.preventDefault();
+  // basic validation
+  let valid = true;
+  state.passengers = [];
+  state.selectedSeats.forEach((seat,i)=>{
+    const name = $("#paxName"+i).value.trim();
+    const age = $("#paxAge"+i).value;
+    const gender = $("#paxGender"+i).value;
+    const idType = $("#paxIdType"+i).value;
+    const idNum = $("#paxIdNum"+i).value.trim();
+    if(!name || !age || !idNum){ valid = false; }
+    state.passengers.push({seat:`${seat.coach}-${seat.id}`, name, age, gender, idType, idNum});
+  });
+  const email = $("#contactEmail").value.trim();
+  const phone = $("#contactPhone").value.trim();
+  if(!email || !phone) valid = false;
+  state.contactEmail = email;
+  state.contactPhone = phone;
+
+  if(!valid){
+    showToast("Please fill in all required passenger and contact details.");
+    return;
+  }
+  updateTripSummaryCard("#paymentTripSummary");
+  $("#paySubtotal").textContent = fmt(state.fareTotal);
+  $("#payFareTotal").textContent = fmt(state.fareTotal);
+  $("#payDiscountRow").style.display = "none";
+  state.couponApplied = null;
+  $("#couponMsg").textContent = "";
+  $("#couponInput").value = "";
+  buildPayPanel("card");
+  goTo("payment");
+});
+
+function buildPayPanel(method){
+  const panel = $("#payPanel");
+  if(method==="card"){
+    panel.innerHTML = `
+      <div class="field-row">
+        <div class="field"><label for="cardNum">Card number</label><input type="text" id="cardNum" placeholder="1234 5678 9012 3456"></div>
+        <div class="field"><label for="cardName">Name on card</label><input type="text" id="cardName" placeholder="Full name"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="cardExp">Expiry</label><input type="text" id="cardExp" placeholder="MM/YY"></div>
+        <div class="field"><label for="cardCvv">CVV</label><input type="text" id="cardCvv" placeholder="123"></div>
+      </div>`;
+  } else if(method==="upi"){
+    panel.innerHTML = `<div class="field"><label for="upiId">UPI ID</label><input type="text" id="upiId" placeholder="yourname@upi"></div>`;
+  } else if(method==="wallet"){
+    panel.innerHTML = `<p style="margin:0;color:var(--text-2);font-size:.88rem;">Pay using your TransitGo wallet balance of <strong>$68.40</strong>. Remaining balance will be charged to your default card.</p>`;
+  } else {
+    panel.innerHTML = `
+      <div class="field"><label for="bankSelect">Select your bank</label>
+        <select id="bankSelect"><option>State Bank</option><option>Global Trust Bank</option><option>City National</option><option>Union Bank</option></select>
+      </div>`;
+  }
+}
+$all('input[name="payMethod"]').forEach(radio=>{
+  radio.addEventListener("change", ()=>{
+    $all(".pay-method").forEach(l=>l.classList.remove("active-pay"));
+    radio.closest(".pay-method").classList.add("active-pay");
+    buildPayPanel(radio.value);
+  });
+});
+
+$("#applyCouponBtn").addEventListener("click", ()=>{
+  const code = $("#couponInput").value.trim().toUpperCase();
+  const codes = {"WEEKEND20": 0.20, "BUSGO10": 10, "FIRST150": 150};
+  if(!codes[code]){
+    $("#couponMsg").style.color = "var(--red)";
+    $("#couponMsg").textContent = "Invalid or expired coupon code.";
+    return;
+  }
+  let discount = 0;
+  const subtotal = state.fareTotal;
+  if(code === "WEEKEND20") discount = subtotal * 0.20;
+  else discount = codes[code];
+  discount = Math.min(discount, subtotal - 1);
+  state.couponApplied = {code, discount};
+  $("#payDiscountRow").style.display = "flex";
+  $("#payDiscount").textContent = "-" + fmt(discount);
+  $("#payFareTotal").textContent = fmt(subtotal - discount);
+  $("#couponMsg").style.color = "var(--green-dark)";
+  $("#couponMsg").textContent = `Applied ${code}`;
+});
+
+$("#backToDetailsBtn").addEventListener("click", ()=> goTo("details"));
+
+$("#payNowBtn").addEventListener("click", ()=>{
+  $("#payNowBtn").disabled = true;
+  $("#payNowBtn").textContent = "Processing…";
+  setTimeout(()=>{
+    finalizeBooking();
+    $("#payNowBtn").disabled = false;
+    $("#payNowBtn").textContent = "Pay now";
+    goTo("confirmation");
+  }, 700);
+});
+
+function finalizeBooking(){
+  const r = state.selectedResult;
+  const pnr = genPnr();
+  state.lastPnr = pnr;
+  $("#confirmPnr").textContent = pnr;
+  $("#confirmEmail").textContent = state.contactEmail || "you@example.com";
+  $("#ticketOperator").textContent = `${r.operator} ${r.num}`;
+  $("#ticketClass").textContent = `Coach ${state.selectedSeats[0]?.coach || "C1"} · ${r.cls}`;
+  $("#ticketFrom").textContent = `${state.from}`;
+  $("#ticketTo").textContent = `${state.to}`;
+  const dateStr = state.date ? new Date(state.date+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}) : "";
+  $("#ticketDepTime").textContent = `${dateStr} • ${r.dep}`;
+  $("#ticketArrTime").textContent = `${dateStr} • ${r.arr}`;
+  $("#ticketDuration").textContent = r.durationTxt;
+
+  $("#ticketPassengers").innerHTML = state.passengers.map(p=>`
+    <div class="pax-chip"><strong>${p.name || "Passenger"}</strong><span>Seat ${p.seat} • ${p.gender}</span></div>
+  `).join("");
+
+  if(!state.bookingsData) initBookingsData();
+  state.bookingsData.upcoming.unshift({
+    pnr, mode: state.mode, operator: `${r.operator} ${r.num}`, cls: r.cls,
+    from: state.from, to: state.to, dep: r.dep, arr: r.arr, date: dateStr,
+    duration: r.durationTxt, passengers: state.passengers.map(p=>p.name || "Passenger"),
+    total: state.couponApplied ? (state.fareTotal - state.couponApplied.discount) : state.fareTotal,
+    status:"confirmed"
+  });
+  showToast("Booking confirmed! Your e-ticket is ready.");
+}
+
+$("#downloadTicketBtn").addEventListener("click", ()=> showToast("E-ticket PDF download started."));
+$("#printTicketBtn").addEventListener("click", ()=> window.print());
+$("#walletTicketBtn").addEventListener("click", ()=> showToast("Ticket added to your mobile wallet."));
+$("#cancelFromConfirmBtn").addEventListener("click", ()=>{ renderBookings("upcoming"); goTo("bookings"); });
+$("#goToBookingsBtn").addEventListener("click", ()=>{ renderBookings("upcoming"); goTo("bookings"); });
+$("#bookAnotherBtn").addEventListener("click", ()=> goTo("home"));
+
+function initBookingsData(){
+  state.bookingsData = {
+    upcoming: [
+      {pnr:"TR-984210", mode:"train", operator:"Amtrak Capital Express #402", cls:"Coach Class (C4)", from:"New York (NYP)", to:"Washington (WAS)", dep:"08:30 AM", arr:"12:15 PM", date:"Oct 24, 2026", duration:"3h 45m", passengers:["Alex Morgan","Jordan Taylor"], total:142.50, status:"confirmed"},
+      {pnr:"BS-449102", mode:"bus", operator:"Greyhound Express #88", cls:"Executive Sleeper", from:"Boston (BOS)", to:"New York (NYC)", dep:"02:00 PM", arr:"06:30 PM", date:"Nov 02, 2026", duration:"4h 30m", passengers:["Alex Morgan"], total:45.00, status:"confirmed"}
+    ],
+    completed: [
+      {pnr:"TR-772310", mode:"train", operator:"Regional Rail #55", cls:"AC Seater", from:"Chicago (CHI)", to:"Boston (BOS)", dep:"07:00 AM", arr:"09:20 PM", date:"Aug 14, 2026", duration:"14h 20m", passengers:["Alex Morgan"], total:98.00, status:"completed"},
+      {pnr:"BS-118820", mode:"bus", operator:"SmartBus", cls:"A/C Seater", from:"Philadelphia (PHL)", to:"New York (NYC)", dep:"09:00 AM", arr:"11:15 AM", date:"Jul 02, 2026", duration:"2h 15m", passengers:["Alex Morgan"], total:22.00, status:"completed"}
+    ],
+    cancelled: [
+      {pnr:"TR-556621", mode:"train", operator:"Express Rail #90", cls:"Sleeper", from:"San Francisco (SFO)", to:"Los Angeles (LAX)", dep:"11:00 PM", arr:"07:00 AM", date:"Jun 18, 2026", duration:"8h 00m", passengers:["Alex Morgan"], total:0, status:"cancelled"}
+    ]
+  };
+}
+function renderBookings(tab){
+  if(!state.bookingsData) initBookingsData();
+  $all(".booking-tab").forEach(t=>{
+    const active = t.dataset.tab === tab;
+    t.classList.toggle("active-tab", active);
+    t.setAttribute("aria-selected", active ? "true":"false");
+  });
+  $("#tabCountUpcoming").textContent = state.bookingsData.upcoming.length;
+  $("#statUpcoming").textContent = state.bookingsData.upcoming.length;
+
+  const items = state.bookingsData[tab] || [];
+  const wrap = $("#bookingsList");
+  if(!items.length){
+    wrap.innerHTML = `<div class="booking-card" style="text-align:center;color:var(--text-2)">Nothing here yet.</div>`;
+    return;
+  }
+  wrap.innerHTML = items.map(b=>`
+    <div class="booking-card" data-pnr="${b.pnr}">
+      <div class="booking-card-top">
+        <div class="pnr-line">
+          <span>${b.mode==="train"?"🚆":"🚌"}</span>
+          <span>PNR: <strong>${b.pnr}</strong></span>
+          <button class="copy-btn" data-copy="${b.pnr}">Copy</button>
+          <span>• ${b.operator} • ${b.cls}</span>
+        </div>
+        <span class="status-pill ${b.status==='cancelled'?'status-cancelled':''}">${b.status.charAt(0).toUpperCase()+b.status.slice(1)}</span>
+      </div>
+      <div class="booking-route-row">
+        <div class="br-col"><span>ORIGIN</span><strong>${b.from}</strong><small>${b.date} • ${b.dep}</small></div>
+        <div class="br-mid">${b.duration} direct<br>${b.status==="confirmed"?"On time":""}</div>
+        <div class="br-col"><span>DESTINATION</span><strong>${b.to}</strong><small>${b.date} • ${b.arr}</small></div>
+        <div class="br-pax"><span>PASSENGERS (${b.passengers.length})</span><strong>${b.passengers.join(", ")}</strong><small>Total paid: $${b.total.toFixed(2)}</small></div>
+      </div>
+      <div class="booking-card-actions">
+        ${b.status==="confirmed" ? `
+          <span class="cancel-note">Free cancellation available</span>
+          <button class="btn-ghost-sm" data-qr="${b.pnr}">View QR code</button>
+          <button class="btn-ghost-sm" data-reschedule="${b.pnr}">Reschedule</button>
+          <button class="btn-danger-outline" data-cancel="${b.pnr}">Cancel booking</button>
+          <button class="btn-primary" data-download="${b.pnr}">Download e-ticket</button>
+        ` : b.status==="completed" ? `
+          <button class="btn-ghost-sm" data-download="${b.pnr}">Download invoice</button>
+        ` : `
+          <span class="cancel-note" style="color:var(--red)">Refund processed</span>
+        `}
+      </div>
+    </div>
+  `).join("");
+
+  $all("[data-copy]").forEach(b=>b.addEventListener("click", ()=>{
+    navigator.clipboard?.writeText(b.dataset.copy).catch(()=>{});
+    showToast("PNR copied: " + b.dataset.copy);
+  }));
+  $all("[data-download]").forEach(b=>b.addEventListener("click", ()=>showToast("Downloading e-ticket for " + b.dataset.download)));
+  $all("[data-qr]").forEach(b=>b.addEventListener("click", ()=>showToast("QR code ready for " + b.dataset.qr)));
+  $all("[data-reschedule]").forEach(b=>b.addEventListener("click", ()=>showToast("Opening reschedule options for " + b.dataset.reschedule)));
+  $all("[data-cancel]").forEach(b=>b.addEventListener("click", ()=>{
+    const pnr = b.dataset.cancel;
+    const idx = state.bookingsData.upcoming.findIndex(x=>x.pnr===pnr);
+    if(idx>-1){
+      const [item] = state.bookingsData.upcoming.splice(idx,1);
+      item.status = "cancelled"; item.total = 0;
+      state.bookingsData.cancelled.unshift(item);
+      showToast("Booking " + pnr + " cancelled. Refund initiated.");
+      renderBookings("upcoming");
+    }
+  }));
+}
+$all(".booking-tab").forEach(tab=>{
+  tab.addEventListener("click", ()=> renderBookings(tab.dataset.tab));
+});
+
+$("#pnrForm").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const val = $("#pnrInput").value.trim().toUpperCase();
+  if(!state.bookingsData) initBookingsData();
+  const all = [...state.bookingsData.upcoming, ...state.bookingsData.completed, ...state.bookingsData.cancelled];
+  const found = all.find(b => b.pnr === val) || all.find(b=>b.pnr.includes(val));
+  const box = $("#pnrResult");
+  box.hidden = false;
+  if(found){
+    box.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong>${found.operator}</strong>
+        <span class="status-pill ${found.status==='cancelled'?'status-cancelled':''}">${found.status.charAt(0).toUpperCase()+found.status.slice(1)}</span>
+      </div>
+      <p style="margin:4px 0;color:var(--text-2);">${found.from} → ${found.to}</p>
+      <p style="margin:4px 0;color:var(--text-2);">${found.date} • Departs ${found.dep} • Arrives ${found.arr}</p>
+      <p style="margin:4px 0;color:var(--text-2);">Passengers: ${found.passengers.join(", ")}</p>
+    `;
+  } else {
+    box.innerHTML = `<p style="margin:0;color:var(--text-2)">No booking found for PNR <strong>${val}</strong>. Double-check the number and try again, or contact support.</p>`;
+  }
+});
+
+$all(".auth-tab").forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    $all(".auth-tab").forEach(t=>t.classList.remove("active-tab"));
+    tab.classList.add("active-tab");
+    $("#phoneForm").hidden = false;
+    $("#otpForm").hidden = true;
+  });
+});
+$("#phoneForm").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  $("#phoneForm").hidden = true;
+  $("#otpForm").hidden = false;
+  showToast("OTP sent to your mobile number.");
+  $all(".otp-digit")[0]?.focus();
+});
+$all(".otp-digit").forEach((inp,i,arr)=>{
+  inp.addEventListener("input", ()=>{
+    if(inp.value && arr[i+1]) arr[i+1].focus();
+  });
+  inp.addEventListener("keydown", (e)=>{
+    if(e.key==="Backspace" && !inp.value && arr[i-1]) arr[i-1].focus();
+  });
+});
+$("#otpForm").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  showToast("Login successful. Welcome back!");
+  goTo("home");
+});
+$("#resendOtpBtn").addEventListener("click", ()=> showToast("A new OTP has been sent."));
+
+function renderFaq(){
+  $("#faqList").innerHTML = FAQS.map((f,i)=>`
+    <div class="faq-item" data-idx="${i}">
+      <button class="faq-q" aria-expanded="false">${f.q}<span aria-hidden="true">+</span></button>
+      <div class="faq-a">${f.a}</div>
+    </div>
+  `).join("");
+  $all(".faq-item").forEach(item=>{
+    const btn = item.querySelector(".faq-q");
+    btn.addEventListener("click", ()=>{
+      const isOpen = item.classList.toggle("open");
+      btn.setAttribute("aria-expanded", isOpen ? "true":"false");
+    });
+  });
+}
+renderFaq();
+renderResults();
+})();
+</script>
+</body>
+</html>
